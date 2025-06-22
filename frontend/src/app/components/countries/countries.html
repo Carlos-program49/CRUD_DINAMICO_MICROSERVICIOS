@@ -1,0 +1,11 @@
+<!-- src/app/components/countries/countries.html -->
+<select
+  class="form-select"
+  [(ngModel)]="selectedId"
+  (ngModelChange)="onSelect($event)"
+>
+  <option [ngValue]="null">-- Seleccione País --</option>
+  <option *ngFor="let c of countries" [ngValue]="c.id">
+    {{ c.nombre }}
+  </option>
+</select>

@@ -1,0 +1,256 @@
+﻿package user.persona.user.dto;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public class UserRequest {
+
+    @NotBlank(message = "El nombre no puede estar vacÃ­o")
+    private String nombre;
+
+    @NotBlank(message = "El apellido no puede estar vacÃ­o")
+    private String apellido;
+
+    @Min(value = 0, message = "La edad debe ser igual o mayor que 0")
+    private int edad;
+
+    @NotNull(message = "El ID del paÃ­s no puede ser nulo")
+    private Long countryId;
+
+    @NotNull(message = "El ID del estado no puede ser nulo")
+    private Long stateId;
+
+    // Getters y setters
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public int getEdad() {
+        return edad;
+    }
+
+    public void setEdad(int edad) {
+        this.edad = edad;
+    }
+
+    public Long getCountryId() {
+        return countryId;
+    }
+
+    public void setCountryId(Long countryId) {
+        this.countryId = countryId;
+    }
+
+    public Long getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+}
+
+package user.persona.user.model;
+
+import jakarta.persistence.*;
+import java.io.Serializable;
+
+@Entity
+@Table(name = "usuario", schema = "public")
+public class User implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String nombre;
+    private String apellido;
+    private int edad;
+
+    private Long countryId;
+    private Long stateId;
+
+    // Getters y setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public int getEdad() {
+        return edad;
+    }
+
+    public void setEdad(int edad) {
+        this.edad = edad;
+    }
+
+    public Long getCountryId() {
+        return countryId;
+    }
+
+    public void setCountryId(Long countryId) {
+        this.countryId = countryId;
+    }
+
+    public Long getStateId() {
+        return stateId;
+    }
+
+    public void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+}
+
+package user.persona.user.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import user.persona.user.model.User;
+
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+}
+
+package user.persona.user.rest;
+
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import user.persona.user.dto.UserRequest;
+import user.persona.user.model.User;
+import user.persona.user.services.UserService;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAll() {
+        return ResponseEntity.ok(userService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<User> save(@Valid @RequestBody UserRequest request) {
+        User user = new User();
+        user.setNombre(request.getNombre());
+        user.setApellido(request.getApellido());
+        user.setEdad(request.getEdad());
+        user.setCountryId(request.getCountryId());
+        user.setStateId(request.getStateId());
+
+        User saved = userService.save(user);
+        return ResponseEntity.created(URI.create("/api/v1/users/" + saved.getId())).body(saved);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> findById(@PathVariable Long id) {
+        return userService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody UserRequest userDto) {
+        if (!userService.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = new User();
+        user.setId(id); // solo aquÃ­ se usa el id
+        user.setNombre(userDto.getNombre());
+        user.setApellido(userDto.getApellido());
+        user.setEdad(userDto.getEdad());
+        user.setCountryId(userDto.getCountryId());
+        user.setStateId(userDto.getStateId());
+
+        User updated = userService.save(user);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        userService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+package user.persona.user.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import user.persona.user.model.User;
+import user.persona.user.repository.UserRepository;
+
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
+}
+

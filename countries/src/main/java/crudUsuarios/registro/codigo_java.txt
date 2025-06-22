@@ -1,0 +1,124 @@
+﻿package crudUsuarios.registro.country.model;
+
+import jakarta.persistence.*;
+import java.io.Serializable;
+
+@Entity
+@Table(name = "pais", schema = "public")
+public class Country implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String nombre;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+}
+
+package crudUsuarios.registro.country.repository;
+
+import crudUsuarios.registro.country.model.Country;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CountryRepository extends JpaRepository<Country, Long> {
+}
+
+package crudUsuarios.registro.country.rest;
+
+import crudUsuarios.registro.country.model.Country;
+import crudUsuarios.registro.country.service.CountryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Tag(name = "Countries")
+@RestController
+@RequestMapping("/api/v1/countries")
+public class CountryController {
+
+    @Autowired
+    private CountryService countryService;
+
+    @GetMapping
+    public ResponseEntity<List<Country>> getAll() {
+        return ResponseEntity.ok(countryService.findAll());
+    }
+}
+
+package crudUsuarios.registro.country.service;
+
+import crudUsuarios.registro.country.model.Country;
+import crudUsuarios.registro.country.repository.CountryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CountryService {
+
+    @Autowired
+    private CountryRepository countryRepository;
+
+    public List<Country> findAll() {
+        return countryRepository.findAll();
+    }
+}
+
+// Ruta: src/main/java/crudUsuarios/registro/CorsConfig.java
+package crudUsuarios.registro;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig {
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:4200")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE");
+            }
+        };
+    }
+}
+
+package crudUsuarios.registro;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class RegistroApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(RegistroApplication.class, args);
+	}
+
+}
+

@@ -1,0 +1,11 @@
+<!-- src/app/components/states/states.html -->
+<select
+  class="form-select"
+  [(ngModel)]="selectedId"
+  (ngModelChange)="onSelect($event)"
+>
+  <option [ngValue]="null">-- Seleccione Estado --</option>
+  <option *ngFor="let s of states" [ngValue]="s.id">
+    {{ s.nombre }}
+  </option>
+</select>

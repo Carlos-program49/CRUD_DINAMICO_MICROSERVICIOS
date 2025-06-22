@@ -1,0 +1,60 @@
+<!-- src/app/components/user-form/user-form.html -->
+<div class="container">
+  <h2 class="text-center mb-4">Formulario de Usuario</h2>
+
+  <form #f="ngForm" (ngSubmit)="save()">
+    <div class="mb-3">
+      <label class="form-label">Nombre</label>
+      <input name="nombre" class="form-control" required [(ngModel)]="model.nombre"/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Apellido</label>
+      <input name="apellido" class="form-control" required [(ngModel)]="model.apellido"/>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Edad</label>
+      <input type="number" name="edad" class="form-control" min="0" required [(ngModel)]="model.edad"/>
+    </div>
+
+    <!-- Two-way en countryId -->
+        <label class="form-label">País</label>
+    <app-countries [(selectedId)]="model.countryId"></app-countries>
+
+    <!-- Two-way en stateId, filtrado por countryId -->
+        <label class="form-label">Estado</label>
+    <app-states
+      [countryId]="model.countryId"
+      [(selectedId)]="model.stateId"
+    
+    ></app-states>
+
+    <div class="mt-3">
+      <button type="submit" class="btn btn-success" [disabled]="f.invalid || !model.stateId">
+        {{ editingId != null ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button *ngIf="editingId" type="button" class="btn btn-secondary ms-2" (click)="cancelEdit()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+
+  <h3 class="text-center mt-5">Usuarios registrados</h3>
+  <table class="table table-striped mt-3" *ngIf="users.length">
+    <thead>
+      <tr>
+        <th>#</th><th>Nombre</th><th>Apellido</th><th>Edad</th><th>País</th><th>Estado</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{u.id}}</td><td>{{u.nombre}}</td><td>{{u.apellido}}</td><td>{{u.edad}}</td>
+        <td>{{u.countryName}}</td><td>{{u.stateName}}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2" (click)="edit(u)">Editar</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(u)">Borrar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!users.length" class="mt-3"><em>Aún no hay usuarios registrados.</em></div>
+</div>
